@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>品質管理ダッシュボード - QC7つ道具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ===== ヘッダー ===== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">QC</div>
+      <h1 class="header-title">品質管理ダッシュボード</h1>
+    </div>
+    <div class="header-right">
+      <button id="btn-seed-demo" class="btn btn-outline" title="デモデータを投入">デモデータ投入</button>
+      <button id="btn-clear-all" class="btn btn-outline btn-danger-outline" title="全データ削除">データリセット</button>
+    </div>
+  </header>
+
+  <!-- ===== タブナビゲーション ===== -->
+  <nav class="tab-bar">
+    <button class="tab-item active" data-tab="tab-dashboard">ダッシュボード</button>
+    <button class="tab-item" data-tab="tab-records">不良記録</button>
+    <button class="tab-item" data-tab="tab-masters">マスタ管理</button>
+    <button class="tab-item" data-tab="tab-pareto">パレート図</button>
+    <button class="tab-item" data-tab="tab-histogram">ヒストグラム</button>
+    <button class="tab-item" data-tab="tab-control">管理図</button>
+    <button class="tab-item" data-tab="tab-scatter">散布図</button>
+    <button class="tab-item" data-tab="tab-stratify">層別分析</button>
+    <button class="tab-item" data-tab="tab-export">データ出力</button>
+  </nav>
+
+  <!-- ===== メインコンテンツ ===== -->
+  <main class="main-content">
+
+    <!-- ===== ダッシュボード ===== -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">今月の不良件数</div>
+          <div class="kpi-value" id="kpi-month-count">-</div>
+          <div class="kpi-sub" id="kpi-month-sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">不良率</div>
+          <div class="kpi-value" id="kpi-defect-rate">-</div>
+          <div class="kpi-sub" id="kpi-rate-sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">最多不良種別</div>
+          <div class="kpi-value kpi-value-sm" id="kpi-top-defect">-</div>
+          <div class="kpi-sub" id="kpi-top-sub"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">未対応件数</div>
+          <div class="kpi-value" id="kpi-open-count">-</div>
+          <div class="kpi-sub" id="kpi-open-sub"></div>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3 class="card-title">不良件数推移（過去30日）</h3>
+          <div class="chart-container"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">直近の不良記録</h3>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-recent">
+              <thead>
+                <tr><th>日付</th><th>製品</th><th>工程</th><th>不良種別</th><th>数量</th><th>重大度</th><th>状態</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 不良記録 ===== -->
+    <section id="tab-records" class="tab-panel">
+      <div class="split-layout">
+        <!-- 入力フォーム -->
+        <div class="panel panel-form">
+          <h3 class="panel-title" id="record-form-title">不良記録 新規登録</h3>
+          <form id="record-form" autocomplete="off">
+            <input type="hidden" id="rec-id">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rec-date">発生日 <span class="required">*</span></label>
+                <input type="date" id="rec-date" required>
+              </div>
+              <div class="form-group">
+                <label for="rec-time">発生時刻</label>
+                <input type="time" id="rec-time">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rec-product">製品 <span class="required">*</span></label>
+                <select id="rec-product" required><option value="">選択してください</option></select>
+              </div>
+              <div class="form-group">
+                <label for="rec-process">工程 <span class="required">*</span></label>
+                <select id="rec-process" required><option value="">選択してください</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rec-defect-type">不良種別 <span class="required">*</span></label>
+                <select id="rec-defect-type" required><option value="">選択してください</option></select>
+              </div>
+              <div class="form-group">
+                <label for="rec-severity">重大度 <span class="required">*</span></label>
+                <select id="rec-severity" required>
+                  <option value="">選択してください</option>
+                  <option value="重大">重大</option>
+                  <option value="重度">重度</option>
+                  <option value="軽度">軽度</option>
+                  <option value="軽微">軽微</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rec-quantity">不良数 <span class="required">*</span></label>
+                <input type="number" id="rec-quantity" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="rec-lot-size">ロットサイズ</label>
+                <input type="number" id="rec-lot-size" min="1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rec-measurement">計測値</label>
+                <input type="number" id="rec-measurement" step="any">
+              </div>
+              <div class="form-group">
+                <label for="rec-detection">検出方法</label>
+                <select id="rec-detection">
+                  <option value="">選択してください</option>
+                  <option value="目視">目視</option>
+                  <option value="測定">測定</option>
+                  <option value="試験">試験</option>
+                  <option value="顧客指摘">顧客指摘</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="rec-operator">作業者名</label>
+              <input type="text" id="rec-operator">
+            </div>
+            <div class="form-group">
+              <label for="rec-description">詳細・備考</label>
+              <textarea id="rec-description" rows="2"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rec-root-cause">原因</label>
+                <select id="rec-root-cause"><option value="">（未選択）</option></select>
+              </div>
+              <div class="form-group">
+                <label for="rec-status">状態</label>
+                <select id="rec-status">
+                  <option value="未対応">未対応</option>
+                  <option value="対応中">対応中</option>
+                  <option value="完了">完了</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="rec-corrective">是正処置</label>
+              <textarea id="rec-corrective" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="btn-save-record">保存</button>
+              <button type="button" class="btn btn-secondary" id="btn-clear-record">クリア</button>
+            </div>
+          </form>
+        </div>
+        <!-- 一覧テーブル -->
+        <div class="panel panel-list">
+          <h3 class="panel-title">不良記録一覧</h3>
+          <div class="filter-bar">
+            <input type="date" id="filter-date-from" title="開始日">
+            <span class="filter-sep">〜</span>
+            <input type="date" id="filter-date-to" title="終了日">
+            <select id="filter-product"><option value="">全製品</option></select>
+            <select id="filter-process"><option value="">全工程</option></select>
+            <select id="filter-status"><option value="">全状態</option><option value="未対応">未対応</option><option value="対応中">対応中</option><option value="完了">完了</option></select>
+            <button class="btn btn-sm" id="btn-filter-apply">検索</button>
+            <button class="btn btn-sm btn-secondary" id="btn-filter-clear">リセット</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-records">
+              <thead>
+                <tr>
+                  <th>日付</th><th>製品</th><th>工程</th><th>不良種別</th>
+                  <th>数量</th><th>重大度</th><th>状態</th><th>操作</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="records-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== マスタ管理 ===== -->
+    <section id="tab-masters" class="tab-panel">
+      <div class="sub-tab-bar">
+        <button class="sub-tab-item active" data-subtab="master-products">製品マスタ</button>
+        <button class="sub-tab-item" data-subtab="master-processes">工程マスタ</button>
+        <button class="sub-tab-item" data-subtab="master-defect-types">不良種別マスタ</button>
+        <button class="sub-tab-item" data-subtab="master-root-causes">原因マスタ</button>
+      </div>
+
+      <!-- 製品マスタ -->
+      <div id="master-products" class="sub-tab-panel active">
+        <div class="master-layout">
+          <div class="master-form-area">
+            <h4>製品 追加・編集</h4>
+            <form id="form-product" class="inline-form">
+              <input type="hidden" id="product-id">
+              <input type="text" id="product-code" placeholder="製品コード" required>
+              <input type="text" id="product-name" placeholder="製品名" required>
+              <input type="text" id="product-category" placeholder="カテゴリ">
+              <button type="submit" class="btn btn-primary btn-sm">保存</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-product">キャンセル</button>
+            </form>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-products">
+              <thead><tr><th>コード</th><th>製品名</th><th>カテゴリ</th><th>操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 工程マスタ -->
+      <div id="master-processes" class="sub-tab-panel">
+        <div class="master-layout">
+          <div class="master-form-area">
+            <h4>工程 追加・編集</h4>
+            <form id="form-process" class="inline-form">
+              <input type="hidden" id="process-id">
+              <input type="text" id="process-name" placeholder="工程名" required>
+              <input type="number" id="process-order" placeholder="順序" min="1">
+              <input type="text" id="process-department" placeholder="部門">
+              <button type="submit" class="btn btn-primary btn-sm">保存</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-process">キャンセル</button>
+            </form>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-processes">
+              <thead><tr><th>工程名</th><th>順序</th><th>部門</th><th>操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 不良種別マスタ -->
+      <div id="master-defect-types" class="sub-tab-panel">
+        <div class="master-layout">
+          <div class="master-form-area">
+            <h4>不良種別 追加・編集</h4>
+            <form id="form-defect-type" class="inline-form">
+              <input type="hidden" id="defect-type-id">
+              <input type="text" id="defect-type-name" placeholder="不良種別名" required>
+              <input type="text" id="defect-type-category" placeholder="カテゴリ">
+              <button type="submit" class="btn btn-primary btn-sm">保存</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-defect-type">キャンセル</button>
+            </form>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-defect-types">
+              <thead><tr><th>不良種別名</th><th>カテゴリ</th><th>操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 原因マスタ -->
+      <div id="master-root-causes" class="sub-tab-panel">
+        <div class="master-layout">
+          <div class="master-form-area">
+            <h4>原因 追加・編集</h4>
+            <form id="form-root-cause" class="inline-form">
+              <input type="hidden" id="root-cause-id">
+              <input type="text" id="root-cause-name" placeholder="原因名" required>
+              <select id="root-cause-4m" required>
+                <option value="">4M分類</option>
+                <option value="人">人 (Man)</option>
+                <option value="機械">機械 (Machine)</option>
+                <option value="材料">材料 (Material)</option>
+                <option value="方法">方法 (Method)</option>
+              </select>
+              <button type="submit" class="btn btn-primary btn-sm">保存</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-cancel-root-cause">キャンセル</button>
+            </form>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-root-causes">
+              <thead><tr><th>原因名</th><th>4M分類</th><th>操作</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== パレート図 ===== -->
+    <section id="tab-pareto" class="tab-panel">
+      <div class="chart-filter-bar">
+        <div class="form-group">
+          <label>期間</label>
+          <input type="date" id="pareto-date-from">
+          <span class="filter-sep">〜</span>
+          <input type="date" id="pareto-date-to">
+        </div>
+        <div class="form-group">
+          <label>製品</label>
+          <select id="pareto-product"><option value="">全製品</option></select>
+        </div>
+        <div class="form-group">
+          <label>工程</label>
+          <select id="pareto-process"><option value="">全工程</option></select>
+        </div>
+        <div class="form-group">
+          <label>集計軸</label>
+          <select id="pareto-axis">
+            <option value="defectType">不良種別</option>
+            <option value="process">工程</option>
+            <option value="product">製品</option>
+            <option value="rootCause">原因</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-pareto-draw">描画</button>
+      </div>
+      <div class="card">
+        <div class="chart-container chart-container-lg"><canvas id="chart-pareto"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">パレート分析データ</h3>
+        <div class="table-wrapper">
+          <table class="data-table" id="table-pareto">
+            <thead><tr><th>項目</th><th>件数</th><th>構成比(%)</th><th>累積(%)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ヒストグラム ===== -->
+    <section id="tab-histogram" class="tab-panel">
+      <div class="chart-filter-bar">
+        <div class="form-group">
+          <label>期間</label>
+          <input type="date" id="hist-date-from">
+          <span class="filter-sep">〜</span>
+          <input type="date" id="hist-date-to">
+        </div>
+        <div class="form-group">
+          <label>製品</label>
+          <select id="hist-product"><option value="">全製品</option></select>
+        </div>
+        <div class="form-group">
+          <label>工程</label>
+          <select id="hist-process"><option value="">全工程</option></select>
+        </div>
+        <div class="form-group">
+          <label>変数</label>
+          <select id="hist-variable">
+            <option value="measurementValue">計測値</option>
+            <option value="quantity">不良数</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>階級数</label>
+          <input type="number" id="hist-bins" min="3" max="30" value="10">
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-hist-draw">描画</button>
+      </div>
+      <div class="card">
+        <div class="chart-container chart-container-lg"><canvas id="chart-histogram"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">統計量</h3>
+        <div class="stats-row">
+          <div class="stat-item"><span class="stat-label">データ数</span><span class="stat-value" id="hist-n">-</span></div>
+          <div class="stat-item"><span class="stat-label">平均</span><span class="stat-value" id="hist-mean">-</span></div>
+          <div class="stat-item"><span class="stat-label">標準偏差</span><span class="stat-value" id="hist-std">-</span></div>
+          <div class="stat-item"><span class="stat-label">最小</span><span class="stat-value" id="hist-min">-</span></div>
+          <div class="stat-item"><span class="stat-label">最大</span><span class="stat-value" id="hist-max">-</span></div>
+          <div class="stat-item"><span class="stat-label">中央値</span><span class="stat-value" id="hist-median">-</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 管理図 ===== -->
+    <section id="tab-control" class="tab-panel">
+      <div class="chart-filter-bar">
+        <div class="form-group">
+          <label>期間</label>
+          <input type="date" id="ctrl-date-from">
+          <span class="filter-sep">〜</span>
+          <input type="date" id="ctrl-date-to">
+        </div>
+        <div class="form-group">
+          <label>工程</label>
+          <select id="ctrl-process"><option value="">全工程</option></select>
+        </div>
+        <div class="form-group">
+          <label>製品</label>
+          <select id="ctrl-product"><option value="">全製品</option></select>
+        </div>
+        <div class="form-group">
+          <label>グラフ種別</label>
+          <select id="ctrl-type">
+            <option value="defect-count">不良数推移 (np管理図)</option>
+            <option value="defect-rate">不良率推移 (p管理図)</option>
+            <option value="measurement">計測値推移 (X管理図)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-ctrl-draw">描画</button>
+      </div>
+      <div class="card">
+        <div class="chart-container chart-container-lg"><canvas id="chart-control"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">管理図情報</h3>
+        <div class="stats-row">
+          <div class="stat-item"><span class="stat-label">CL（中心線）</span><span class="stat-value" id="ctrl-cl">-</span></div>
+          <div class="stat-item"><span class="stat-label">UCL（上方管理限界）</span><span class="stat-value" id="ctrl-ucl">-</span></div>
+          <div class="stat-item"><span class="stat-label">LCL（下方管理限界）</span><span class="stat-value" id="ctrl-lcl">-</span></div>
+          <div class="stat-item"><span class="stat-label">管理外点数</span><span class="stat-value" id="ctrl-oor">-</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 散布図 ===== -->
+    <section id="tab-scatter" class="tab-panel">
+      <div class="chart-filter-bar">
+        <div class="form-group">
+          <label>期間</label>
+          <input type="date" id="scatter-date-from">
+          <span class="filter-sep">〜</span>
+          <input type="date" id="scatter-date-to">
+        </div>
+        <div class="form-group">
+          <label>X軸</label>
+          <select id="scatter-x">
+            <option value="quantity">不良数</option>
+            <option value="lotSize">ロットサイズ</option>
+            <option value="measurementValue">計測値</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Y軸</label>
+          <select id="scatter-y">
+            <option value="measurementValue">計測値</option>
+            <option value="quantity">不良数</option>
+            <option value="lotSize">ロットサイズ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>層別</label>
+          <select id="scatter-group">
+            <option value="">なし</option>
+            <option value="product">製品</option>
+            <option value="process">工程</option>
+            <option value="defectType">不良種別</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-scatter-draw">描画</button>
+      </div>
+      <div class="card">
+        <div class="chart-container chart-container-lg"><canvas id="chart-scatter"></canvas></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">相関分析</h3>
+        <div class="stats-row">
+          <div class="stat-item"><span class="stat-label">データ数</span><span class="stat-value" id="scatter-n">-</span></div>
+          <div class="stat-item"><span class="stat-label">相関係数 (r)</span><span class="stat-value" id="scatter-r">-</span></div>
+          <div class="stat-item"><span class="stat-label">決定係数 (R²)</span><span class="stat-value" id="scatter-r2">-</span></div>
+          <div class="stat-item"><span class="stat-label">回帰式</span><span class="stat-value" id="scatter-eq">-</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 層別分析 ===== -->
+    <section id="tab-stratify" class="tab-panel">
+      <div class="chart-filter-bar">
+        <div class="form-group">
+          <label>期間</label>
+          <input type="date" id="strat-date-from">
+          <span class="filter-sep">〜</span>
+          <input type="date" id="strat-date-to">
+        </div>
+        <div class="form-group">
+          <label>行軸</label>
+          <select id="strat-row-axis">
+            <option value="process">工程</option>
+            <option value="product">製品</option>
+            <option value="rootCause">原因(4M)</option>
+            <option value="severity">重大度</option>
+            <option value="operator">作業者</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>列軸</label>
+          <select id="strat-col-axis">
+            <option value="defectType">不良種別</option>
+            <option value="process">工程</option>
+            <option value="product">製品</option>
+            <option value="severity">重大度</option>
+            <option value="month">月別</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>集計値</label>
+          <select id="strat-metric">
+            <option value="count">件数</option>
+            <option value="quantity">不良数合計</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-strat-draw">分析実行</button>
+      </div>
+
+      <!-- ヒートマップ -->
+      <div class="card">
+        <h3 class="card-title">クロス集計ヒートマップ</h3>
+        <div id="strat-heatmap-container" class="strat-heatmap-wrapper">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-text">「分析実行」をクリックして層別分析を表示します</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分析サマリー -->
+      <div class="card">
+        <h3 class="card-title">自動分析サマリー</h3>
+        <div id="strat-summary" class="strat-summary">
+          <div class="empty-state">
+            <div class="empty-state-text">分析実行後、自動的にデータの特徴と改善ポイントを表示します</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 上位集中テーブル -->
+      <div class="card">
+        <h3 class="card-title">ワースト組み合わせ（上位10件）</h3>
+        <div class="table-wrapper">
+          <table class="data-table" id="table-strat-worst">
+            <thead>
+              <tr><th>順位</th><th>行項目</th><th>列項目</th><th>件数</th><th>構成比</th><th>累積</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== データ出力 ===== -->
+    <section id="tab-export" class="tab-panel">
+      <div class="export-grid">
+        <div class="card">
+          <h3 class="card-title">データエクスポート</h3>
+          <p class="card-desc">蓄積した不良記録やマスタデータを外部ファイルとして出力します。</p>
+          <div class="export-actions">
+            <button class="btn btn-primary" id="btn-export-csv">不良記録 CSV出力</button>
+            <button class="btn btn-primary" id="btn-export-json">全データ JSON出力</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">データインポート（JSON）</h3>
+          <p class="card-desc">バックアップしたJSONファイルからデータを復元します。</p>
+          <div class="export-actions">
+            <input type="file" id="import-json-file" accept=".json" class="file-input">
+            <label for="import-json-file" class="btn btn-secondary">JSONファイルを選択</label>
+            <button class="btn btn-primary" id="btn-import-json" disabled>インポート実行</button>
+          </div>
+          <div id="import-status" class="import-status"></div>
+        </div>
+        <div class="card card-wide">
+          <h3 class="card-title">Excel / CSV インポート</h3>
+          <p class="card-desc">Excel (.xlsx) または CSV ファイルから不良記録データを取り込みます。列名から自動的にマッピングを行い、マスタデータも自動登録します。</p>
+          <div class="export-actions">
+            <input type="file" id="import-ext-file" accept=".xlsx,.xls,.csv" class="file-input">
+            <label for="import-ext-file" class="btn btn-secondary">Excel / CSV ファイルを選択</label>
+          </div>
+          <!-- シート選択（Excelの場合のみ表示） -->
+          <div id="ext-sheet-selector" class="ext-import-section" style="display:none;">
+            <label class="form-label">取り込むシート:</label>
+            <div id="ext-sheet-list" class="ext-sheet-list"></div>
+          </div>
+          <!-- カラムマッピングプレビュー -->
+          <div id="ext-mapping-area" class="ext-import-section" style="display:none;">
+            <h4 class="sub-title">列マッピング設定</h4>
+            <p class="card-desc">ファイルの列をアプリのフィールドに対応付けます。自動検出された結果を確認・修正してください。</p>
+            <div id="ext-mapping-grid" class="ext-mapping-grid"></div>
+            <h4 class="sub-title">データプレビュー（先頭5件）</h4>
+            <div id="ext-preview-table" class="ext-preview-table"></div>
+            <div class="ext-import-options">
+              <label class="form-label">
+                <input type="radio" name="ext-import-mode" value="append" checked> 既存データに追加
+              </label>
+              <label class="form-label">
+                <input type="radio" name="ext-import-mode" value="replace"> 既存データを置換
+              </label>
+            </div>
+            <div class="export-actions">
+              <button class="btn btn-primary" id="btn-import-ext">インポート実行</button>
+            </div>
+          </div>
+          <div id="ext-import-status" class="import-status"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">スキル連携用エクスポート</h3>
+          <p class="card-desc">Claude Codeスキル（特性要因図・根本原因分析・月次レポート）で分析するためのデータ出力です。</p>
+          <div class="export-actions">
+            <button class="btn btn-secondary" id="btn-export-skill">分析用JSONコピー</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== フッター ===== -->
+  <footer class="footer">
+    <span>品質管理ダッシュボード v1.0</span>
+    <span>データはブラウザ内(IndexedDB)に保存されます。サーバー通信は行いません。</span>
+  </footer>
+
+  <!-- ===== 外部ライブラリ ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/dexie@4.0.11/dist/dexie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- ===== アプリケーション ===== -->
+  <script src="js/utils.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/masters.js"></script>
+  <script src="js/records.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/charts/pareto.js"></script>
+  <script src="js/charts/histogram.js"></script>
+  <script src="js/charts/control-chart.js"></script>
+  <script src="js/charts/scatter.js"></script>
+  <script src="js/charts/stratify.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
