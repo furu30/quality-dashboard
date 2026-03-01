@@ -10,6 +10,61 @@ window.QualityApp = window.QualityApp || {};
   var data = app.data;
   var u = app.utils;
 
+  // ===== モード管理 =====
+
+  var currentMode = null; // 'defect' | 'inspection'
+
+  var MODE_TABS = {
+    defect: ['tab-dashboard', 'tab-records', 'tab-masters', 'tab-pareto', 'tab-scatter', 'tab-stratify', 'tab-export'],
+    inspection: ['tab-dashboard', 'tab-histogram', 'tab-control', 'tab-insp-analysis', 'tab-export']
+  };
+
+  var MODE_LABELS = {
+    defect: '不良解析モード',
+    inspection: '検査解析モード'
+  };
+
+  function setMode(mode) {
+    currentMode = mode;
+    // オーバーレイ非表示
+    var overlay = document.getElementById('mode-select-overlay');
+    if (overlay) overlay.style.display = 'none';
+    // タブの表示/非表示を切替
+    var allowedTabs = MODE_TABS[mode];
+    document.querySelectorAll('.tab-item').forEach(function(btn) {
+      btn.style.display = allowedTabs.indexOf(btn.dataset.tab) !== -1 ? '' : 'none';
+    });
+    // ヘッダーのモード表示更新
+    var label = document.getElementById('current-mode-label');
+    if (label) {
+      label.textContent = MODE_LABELS[mode];
+      label.setAttribute('data-mode', mode);
+    }
+    // ダッシュボードに遷移
+    switchTab('tab-dashboard');
+  }
+
+  function showModeSelect() {
+    var overlay = document.getElementById('mode-select-overlay');
+    if (overlay) overlay.style.display = 'flex';
+  }
+
+  function initModeSelect() {
+    // モード選択カードのクリックイベント
+    var cards = document.querySelectorAll('.mode-card');
+    cards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        var mode = card.getAttribute('data-mode');
+        if (mode) setMode(mode);
+      });
+    });
+    // ヘッダーのモード切替ボタン
+    var switchBtn = document.getElementById('btn-switch-mode');
+    if (switchBtn) {
+      switchBtn.addEventListener('click', showModeSelect);
+    }
+  }
+
   // ===== タブルーティング =====
 
   function initTabs() {
@@ -24,6 +79,11 @@ window.QualityApp = window.QualityApp || {};
   }
 
   function switchTab(tabId) {
+    // モード制約チェック: 現在のモードで許可されないタブは遷移しない
+    if (currentMode && MODE_TABS[currentMode].indexOf(tabId) === -1) {
+      tabId = 'tab-dashboard';
+    }
+
     // タブボタン更新
     document.querySelectorAll('.tab-item').forEach(function(b) { b.classList.remove('active'); });
     var activeBtn = document.querySelector('.tab-item[data-tab="' + tabId + '"]');
@@ -172,6 +232,7 @@ window.QualityApp = window.QualityApp || {};
       });
     }).then(function() {
       alert('デモ①を投入しました（不良記録220件、製品5種、工程6種、不良種別8種、原因12種）');
+      setMode('defect');
       app.onDataReloaded();
     }).catch(function(err) {
       alert('デモデータ投入中にエラーが発生しました: ' + err.message);
@@ -222,6 +283,7 @@ window.QualityApp = window.QualityApp || {};
       var inspRecords = generateInspectionRecords(productId, processId);
       return app.db.inspectionRecords.bulkAdd(inspRecords);
     }).then(function() {
+      setMode('inspection');
       app.onDataReloaded();
       alert('デモ②を投入しました（M6ボルト抜取検査データ1200件）\n\nヒストグラムタブに自動遷移します。');
       // alert後にタブ遷移（alertはブロッキングなのでUI操作はその後）
@@ -470,10 +532,16 @@ window.QualityApp = window.QualityApp || {};
     // タブ
     initTabs();
 
+    // モード選択
+    initModeSelect();
+
     // ヘッダーボタン
     document.getElementById('btn-seed-demo1').addEventListener('click', seedDemo1);
     document.getElementById('btn-seed-demo2').addEventListener('click', seedDemo2);
     document.getElementById('btn-clear-all').addEventListener('click', clearAllData);
+
+    // 起動時: モード選択オーバーレイを表示
+    showModeSelect();
   }
 
   document.addEventListener('DOMContentLoaded', boot);

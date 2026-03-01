@@ -1036,6 +1036,193 @@ textarea { resize: vertical; }
   }
 }
 
+/* ===== Mode Select Overlay ===== */
+.mode-select-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modeOverlayFadeIn 0.3s ease;
+}
+
+@keyframes modeOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mode-select-overlay[style*="display: none"] {
+  pointer-events: none;
+}
+
+.mode-select-inner {
+  text-align: center;
+  max-width: 760px;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.mode-select-header {
+  margin-bottom: 40px;
+}
+
+.mode-select-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+
+.mode-select-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.mode-select-subtitle {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.mode-select-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.mode-card {
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  cursor: pointer;
+  transition: border-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+  text-align: left;
+}
+
+.mode-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(76, 139, 245, 0.15);
+}
+
+.mode-card:active {
+  transform: translateY(-1px);
+}
+
+.mode-card-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.mode-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.mode-card-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.mode-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+.mode-card-features li {
+  font-size: 13px;
+  color: var(--text-2);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  padding-left: 18px;
+}
+
+.mode-card-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.mode-card-features li:last-child {
+  border-bottom: none;
+}
+
+.mode-card-action {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  transition: color 0.2s;
+}
+
+.mode-card:hover .mode-card-action {
+  color: var(--primary-hover);
+}
+
+/* ===== Mode Indicator in Header ===== */
+.mode-indicator {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.mode-indicator[data-mode="defect"] {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.mode-indicator[data-mode="inspection"] {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.btn-mode-switch {
+  border-color: var(--muted) !important;
+  color: var(--muted) !important;
+}
+
+.btn-mode-switch:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+}
+
+/* ===== Mode Select - Responsive ===== */
+@media (max-width: 600px) {
+  .mode-select-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .mode-card {
+    padding: 24px 20px;
+  }
+  .mode-select-title {
+    font-size: 20px;
+  }
+}
+
 /* ===== Print ===== */
 @media print {
   .header, .tab-bar, .footer,

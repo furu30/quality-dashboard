@@ -9,13 +9,59 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- ===== モード選択オーバーレイ ===== -->
+  <div id="mode-select-overlay" class="mode-select-overlay">
+    <div class="mode-select-inner">
+      <div class="mode-select-header">
+        <div class="mode-select-logo">QC</div>
+        <h1 class="mode-select-title">品質管理ダッシュボード</h1>
+        <p class="mode-select-subtitle">解析モードを選択してください</p>
+      </div>
+      <div class="mode-select-container">
+        <!-- 不良解析モード -->
+        <div class="mode-card" data-mode="defect">
+          <div class="mode-card-icon">&#x1F4CB;</div>
+          <h2 class="mode-card-title">不良解析モード</h2>
+          <p class="mode-card-desc">不良記録の集計・分析に特化</p>
+          <ul class="mode-card-features">
+            <li>ダッシュボード</li>
+            <li>不良記録</li>
+            <li>マスタ管理</li>
+            <li>パレート図</li>
+            <li>散布図</li>
+            <li>層別分析</li>
+            <li>データ出力</li>
+          </ul>
+          <div class="mode-card-action">選択する →</div>
+        </div>
+        <!-- 検査解析モード -->
+        <div class="mode-card" data-mode="inspection">
+          <div class="mode-card-icon">&#x1F4D0;</div>
+          <h2 class="mode-card-title">検査解析モード</h2>
+          <p class="mode-card-desc">検査データの統計分析に特化</p>
+          <ul class="mode-card-features">
+            <li>ダッシュボード</li>
+            <li>ヒストグラム</li>
+            <li>管理図</li>
+            <li>検査分析</li>
+            <li>データ出力</li>
+          </ul>
+          <div class="mode-card-action">選択する →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== ヘッダー ===== -->
   <header class="header">
     <div class="header-left">
       <div class="logo">QC</div>
       <h1 class="header-title">品質管理ダッシュボード</h1>
+      <span id="current-mode-label" class="mode-indicator"></span>
     </div>
     <div class="header-right">
+      <button id="btn-switch-mode" class="btn btn-outline btn-mode-switch" title="解析モードを切替">モード切替</button>
       <button id="btn-seed-demo1" class="btn btn-outline" title="不良記録のデモデータを投入">デモ①不良統計</button>
       <button id="btn-seed-demo2" class="btn btn-outline" title="検査データのデモデータを投入">デモ②時系列検査</button>
       <button id="btn-clear-all" class="btn btn-outline btn-danger-outline" title="全データ削除">データリセット</button>
