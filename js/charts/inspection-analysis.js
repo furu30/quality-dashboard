@@ -110,6 +110,19 @@ window.QualityApp = window.QualityApp || {};
         return { name: name, n: vals.length, mean: u.round(mn, 4), sd: u.round(sd, 4), cpk: cpk, oorRate: oorRate, values: vals };
       });
 
+      // カードタイトル更新
+      var GROUP_LABELS = {
+        operator: '作業者別',
+        shift: '時間帯（シフト）別',
+        temp: '設備温度帯別',
+        toolwear: '工具カット数帯別',
+        lot: 'ロット別'
+      };
+      var mtypeName = filters.measurementType || '全項目';
+      var groupLabel = GROUP_LABELS[groupBy] || groupBy;
+      var titleEl = document.getElementById('ia-factor-chart-title');
+      if (titleEl) titleEl.textContent = mtypeName + ' ─ ' + groupLabel + '比較（n=' + records.length + '）';
+
       // 散布図描画（ジッター付き）
       renderFactorChart(groupNames, statsData, usl, lsl);
 
@@ -237,7 +250,8 @@ window.QualityApp = window.QualityApp || {};
             max: groupNames.length - 0.5,
             grid: { color: 'rgba(34,48,74,0.5)' },
             ticks: {
-              color: '#7d8590',
+              color: '#e6edf3',
+              font: { size: 13, weight: '600' },
               stepSize: 1,
               callback: function(val) { return groupNames[val] || ''; }
             }
