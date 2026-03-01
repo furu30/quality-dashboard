@@ -173,15 +173,21 @@ window.QualityApp = window.QualityApp || {};
     if (!ctx) return;
     if (factorChart) factorChart.destroy();
 
-    // 散布図データ: 各グループのデータ点をジッター付きで配置
-    var scatterData = [];
-    var bgColors = [];
-    statsData.forEach(function(g, gIdx) {
-      g.values.forEach(function(v) {
+    // グループごとに別データセットを作成（凡例でグループ名を表示）
+    var datasets = statsData.map(function(g, gIdx) {
+      var color = u.CHART_COLORS[gIdx % u.CHART_COLORS.length];
+      var points = g.values.map(function(v) {
         var jitter = (Math.random() - 0.5) * 0.6;
-        scatterData.push({ x: gIdx + jitter, y: v });
-        bgColors.push(u.CHART_COLORS[gIdx % u.CHART_COLORS.length] + '99');
+        return { x: gIdx + jitter, y: v };
       });
+      return {
+        label: g.name,
+        data: points,
+        backgroundColor: color + '99',
+        borderColor: color,
+        pointRadius: 3,
+        pointHoverRadius: 5
+      };
     });
 
     // 平均値マーカー
@@ -189,13 +195,7 @@ window.QualityApp = window.QualityApp || {};
       return { x: i, y: g.mean };
     });
 
-    var datasets = [{
-      label: '測定値',
-      data: scatterData,
-      backgroundColor: bgColors,
-      pointRadius: 3,
-      pointHoverRadius: 5
-    }, {
+    datasets.push({
       label: '平均',
       data: meanData,
       backgroundColor: '#fff',
@@ -204,7 +204,7 @@ window.QualityApp = window.QualityApp || {};
       pointStyle: 'rectRot',
       pointHoverRadius: 9,
       showLine: false
-    }];
+    });
 
     // アノテーション
     var annotations = {};
