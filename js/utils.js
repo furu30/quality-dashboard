@@ -164,6 +164,30 @@ window.QualityApp = window.QualityApp || {};
     '#6366f1', '#84cc16', '#e11d48', '#0ea5e9', '#d946ef'
   ];
 
+  /** パーセンタイル (0-1) */
+  function percentile(arr, p) {
+    if (!arr.length) return 0;
+    var sorted = arr.slice().sort(function(a, b) { return a - b; });
+    var idx = p * (sorted.length - 1);
+    var lo = Math.floor(idx);
+    var hi = Math.ceil(idx);
+    if (lo === hi) return sorted[lo];
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+  }
+
+  /** 箱ひげ図用統計値 */
+  function boxStats(arr) {
+    if (!arr.length) return { q1: 0, q3: 0, iqr: 0, wLow: 0, wHigh: 0 };
+    var q1 = percentile(arr, 0.25);
+    var q3 = percentile(arr, 0.75);
+    var iqr = q3 - q1;
+    return {
+      q1: q1, q3: q3, iqr: iqr,
+      wLow: q1 - 1.5 * iqr,
+      wHigh: q3 + 1.5 * iqr
+    };
+  }
+
   // エクスポート
   app.utils = {
     SEVERITY: SEVERITY,
@@ -188,6 +212,8 @@ window.QualityApp = window.QualityApp || {};
     median: median,
     correlationCoefficient: correlationCoefficient,
     linearRegression: linearRegression,
+    percentile: percentile,
+    boxStats: boxStats,
   };
 
 })(window.QualityApp);

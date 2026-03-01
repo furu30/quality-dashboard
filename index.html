@@ -31,6 +31,7 @@
     <button class="tab-item" data-tab="tab-histogram">ヒストグラム</button>
     <button class="tab-item" data-tab="tab-control">管理図</button>
     <button class="tab-item" data-tab="tab-scatter">散布図</button>
+    <button class="tab-item" data-tab="tab-insp-analysis">検査分析</button>
     <button class="tab-item" data-tab="tab-stratify">層別分析</button>
     <button class="tab-item" data-tab="tab-export">データ出力</button>
   </nav>
@@ -539,6 +540,152 @@
       </div>
     </section>
 
+    <!-- ===== 検査分析 ===== -->
+    <section id="tab-insp-analysis" class="tab-panel">
+      <!-- サブタブ -->
+      <div class="sub-tab-bar">
+        <button class="sub-tab-item active" data-subtab="ia-factor">要因別比較</button>
+        <button class="sub-tab-item" data-subtab="ia-western">管理図異常検出</button>
+        <button class="sub-tab-item" data-subtab="ia-cpk-trend">Cpk推移</button>
+      </div>
+
+      <!-- ===== サブタブ1: 要因別比較 ===== -->
+      <div id="ia-factor" class="sub-tab-panel active">
+        <div class="chart-filter-bar">
+          <div class="form-group">
+            <label>期間</label>
+            <input type="date" id="ia-f-date-from">
+            <span class="filter-sep">〜</span>
+            <input type="date" id="ia-f-date-to">
+          </div>
+          <div class="form-group">
+            <label>測定項目</label>
+            <select id="ia-f-mtype"><option value="">全項目</option></select>
+          </div>
+          <div class="form-group">
+            <label>グループ化軸</label>
+            <select id="ia-f-group">
+              <option value="operator">作業者</option>
+              <option value="shift">時間帯（シフト）</option>
+              <option value="temp">設備温度帯</option>
+              <option value="toolwear">工具カット数帯</option>
+              <option value="lot">ロット</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-ia-f-draw">分析実行</button>
+        </div>
+        <div class="card">
+          <h3 class="card-title">要因別測定値分布</h3>
+          <div class="chart-container chart-container-lg"><canvas id="chart-ia-factor"></canvas></div>
+        </div>
+        <!-- 自動インサイト -->
+        <div class="card" id="ia-f-insights-card" style="display:none;">
+          <h3 class="card-title">自動インサイト</h3>
+          <div id="ia-f-insights" class="ia-insights"></div>
+        </div>
+        <!-- 統計テーブル -->
+        <div class="card">
+          <h3 class="card-title">グループ別統計</h3>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-ia-factor">
+              <thead>
+                <tr><th>グループ</th><th>n</th><th>平均</th><th>σ</th><th>Cpk</th><th>規格外れ率</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== サブタブ2: 管理図異常検出 ===== -->
+      <div id="ia-western" class="sub-tab-panel">
+        <div class="chart-filter-bar">
+          <div class="form-group">
+            <label>期間</label>
+            <input type="date" id="ia-w-date-from">
+            <span class="filter-sep">〜</span>
+            <input type="date" id="ia-w-date-to">
+          </div>
+          <div class="form-group">
+            <label>測定項目</label>
+            <select id="ia-w-mtype"><option value="">全項目</option></select>
+          </div>
+          <div class="form-group">
+            <label>管理図タイプ</label>
+            <select id="ia-w-type">
+              <option value="individual">個別値 (X-mR)</option>
+              <option value="xbar">X̄-R</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-ia-w-draw">異常検出</button>
+        </div>
+        <!-- 判定サマリー -->
+        <div class="card" id="ia-w-summary-card" style="display:none;">
+          <div id="ia-w-summary" class="ia-summary"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">管理図（異常検出付き）</h3>
+          <div class="chart-container chart-container-lg"><canvas id="chart-ia-western"></canvas></div>
+        </div>
+        <!-- 違反一覧 -->
+        <div class="card" id="ia-w-violations-card" style="display:none;">
+          <h3 class="card-title">検出された異常パターン</h3>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-ia-violations">
+              <thead>
+                <tr><th>#</th><th>ルール</th><th>位置</th><th>値</th><th>説明</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== サブタブ3: Cpk推移 ===== -->
+      <div id="ia-cpk-trend" class="sub-tab-panel">
+        <div class="chart-filter-bar">
+          <div class="form-group">
+            <label>期間</label>
+            <input type="date" id="ia-c-date-from">
+            <span class="filter-sep">〜</span>
+            <input type="date" id="ia-c-date-to">
+          </div>
+          <div class="form-group">
+            <label>測定項目</label>
+            <select id="ia-c-mtype"><option value="">全項目</option></select>
+          </div>
+          <div class="form-group">
+            <label>集計単位</label>
+            <select id="ia-c-unit">
+              <option value="day">日別</option>
+              <option value="week">週別</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-ia-c-draw">描画</button>
+        </div>
+        <!-- 全体判定 -->
+        <div class="card" id="ia-c-summary-card" style="display:none;">
+          <div id="ia-c-summary" class="ia-summary"></div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Cpk推移グラフ</h3>
+          <div class="chart-container chart-container-lg"><canvas id="chart-ia-cpk"></canvas></div>
+        </div>
+        <!-- 期間別統計テーブル -->
+        <div class="card">
+          <h3 class="card-title">期間別工程能力</h3>
+          <div class="table-wrapper">
+            <table class="data-table" id="table-ia-cpk">
+              <thead>
+                <tr><th>期間</th><th>n</th><th>平均</th><th>σ</th><th>Cp</th><th>Cpk</th><th>判定</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== 層別分析 ===== -->
     <section id="tab-stratify" class="tab-panel">
       <div class="chart-filter-bar">
@@ -693,17 +840,18 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- ===== アプリケーション ===== -->
-  <script src="js/utils.js?v=2"></script>
-  <script src="js/db.js?v=2"></script>
-  <script src="js/masters.js?v=2"></script>
-  <script src="js/records.js?v=2"></script>
-  <script src="js/dashboard.js?v=2"></script>
-  <script src="js/charts/pareto.js?v=2"></script>
-  <script src="js/charts/histogram.js?v=2"></script>
-  <script src="js/charts/control-chart.js?v=2"></script>
-  <script src="js/charts/scatter.js?v=2"></script>
-  <script src="js/charts/stratify.js?v=2"></script>
-  <script src="js/export.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/utils.js?v=3"></script>
+  <script src="js/db.js?v=3"></script>
+  <script src="js/masters.js?v=3"></script>
+  <script src="js/records.js?v=3"></script>
+  <script src="js/dashboard.js?v=3"></script>
+  <script src="js/charts/pareto.js?v=3"></script>
+  <script src="js/charts/histogram.js?v=3"></script>
+  <script src="js/charts/control-chart.js?v=3"></script>
+  <script src="js/charts/scatter.js?v=3"></script>
+  <script src="js/charts/stratify.js?v=3"></script>
+  <script src="js/charts/inspection-analysis.js?v=3"></script>
+  <script src="js/export.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>

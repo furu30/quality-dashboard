@@ -870,6 +870,84 @@ textarea { resize: vertical; }
   color: var(--text-2);
 }
 
+/* ===== Inspection Analysis ===== */
+.ia-insights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.ia-insight {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  border-left: 4px solid var(--primary);
+}
+
+.ia-insight-warn { border-left-color: var(--danger); }
+.ia-insight-caution { border-left-color: var(--warning); }
+.ia-insight-ok { border-left-color: var(--success); }
+.ia-insight-info { border-left-color: var(--primary); }
+
+.ia-insight-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.ia-insight-body {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.ia-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.ia-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ia-summary-badge-ok {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.ia-summary-badge-caution {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.ia-summary-badge-alert {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.ia-summary-text {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* Cpk判定カラー */
+.cpk-excellent { color: var(--success); }
+.cpk-good { color: var(--primary); }
+.cpk-marginal { color: var(--warning); }
+.cpk-poor { color: var(--danger); }
+
 /* ===== Pagination ===== */
 .pagination {
   display: flex;

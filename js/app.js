@@ -51,6 +51,9 @@ window.QualityApp = window.QualityApp || {};
     app.pareto.populateFilters();
     app.histogram.populateFilters();
     app.controlChart.populateFilters();
+    if (app.inspectionAnalysis && app.inspectionAnalysis.populateInspectionTypes) {
+      app.inspectionAnalysis.populateInspectionTypes();
+    }
   };
 
   // ===== データ再読込コールバック（インポート後） =====
@@ -65,6 +68,9 @@ window.QualityApp = window.QualityApp || {};
     // 検査データのドロップダウンも更新（表示中の場合）
     if (app.histogram.populateInspectionTypes) app.histogram.populateInspectionTypes();
     if (app.controlChart.populateInspectionTypes) app.controlChart.populateInspectionTypes();
+    if (app.inspectionAnalysis && app.inspectionAnalysis.populateInspectionTypes) {
+      app.inspectionAnalysis.populateInspectionTypes();
+    }
   };
 
   // ===== ガウス乱数（Box-Muller変換） =====
@@ -458,6 +464,7 @@ window.QualityApp = window.QualityApp || {};
     app.controlChart.init();
     app.scatter.init();
     app.stratify.init();
+    app.inspectionAnalysis.init();
     app.exportModule.init();
 
     // タブ
