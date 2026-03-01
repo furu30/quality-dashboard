@@ -593,6 +593,7 @@
         <button class="sub-tab-item active" data-subtab="ia-factor">要因別比較</button>
         <button class="sub-tab-item" data-subtab="ia-western">管理図異常検出</button>
         <button class="sub-tab-item" data-subtab="ia-cpk-trend">Cpk推移</button>
+        <button class="sub-tab-item" data-subtab="ia-guide">Cpk解説</button>
       </div>
 
       <!-- ===== サブタブ1: 要因別比較 ===== -->
@@ -729,6 +730,167 @@
             </table>
           </div>
         </div>
+      </div>
+
+      <!-- ===== サブタブ4: Cpk解説ガイド ===== -->
+      <div id="ia-guide" class="sub-tab-panel">
+
+        <!-- イントロ -->
+        <div class="card guide-hero">
+          <h2 class="guide-hero-title">Cpk（工程能力指数）とは？</h2>
+          <p class="guide-hero-lead">工程が規格の範囲内で安定して製品を作れているかを <strong>1つの数値</strong> で示す指標です。<br>値が大きいほど品質が安定しています。</p>
+        </div>
+
+        <!-- 計算式 -->
+        <div class="card">
+          <h3 class="card-title">計算式</h3>
+          <div class="guide-formula-box">
+            <div class="guide-formula">Cpk = min( (USL − μ) ÷ 3σ , (μ − LSL) ÷ 3σ )</div>
+          </div>
+          <div class="guide-terms">
+            <div class="guide-term">
+              <span class="guide-term-sym">USL</span>
+              <span class="guide-term-desc">上限規格値（Upper Specification Limit）</span>
+            </div>
+            <div class="guide-term">
+              <span class="guide-term-sym">LSL</span>
+              <span class="guide-term-desc">下限規格値（Lower Specification Limit）</span>
+            </div>
+            <div class="guide-term">
+              <span class="guide-term-sym">μ</span>
+              <span class="guide-term-desc">工程の平均値</span>
+            </div>
+            <div class="guide-term">
+              <span class="guide-term-sym">σ</span>
+              <span class="guide-term-desc">工程の標準偏差（ばらつきの大きさ）</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 判定基準 -->
+        <div class="card">
+          <h3 class="card-title">判定基準</h3>
+          <div class="guide-levels">
+            <div class="guide-level guide-level-excellent">
+              <div class="guide-level-header">
+                <span class="guide-level-value">Cpk ≧ 1.67</span>
+                <span class="guide-level-badge cpk-excellent">優秀</span>
+              </div>
+              <p>十分な工程能力があります。管理の頻度を減らし、コスト削減を検討できます。</p>
+            </div>
+            <div class="guide-level guide-level-good">
+              <div class="guide-level-header">
+                <span class="guide-level-value">Cpk ≧ 1.33</span>
+                <span class="guide-level-badge cpk-good">良好</span>
+              </div>
+              <p>業界で一般的な目標値です。安定した生産が可能で、不良率は約63ppm以下です。</p>
+            </div>
+            <div class="guide-level guide-level-marginal">
+              <div class="guide-level-header">
+                <span class="guide-level-value">Cpk ≧ 1.00</span>
+                <span class="guide-level-badge cpk-marginal">要改善</span>
+              </div>
+              <p>最低限の水準です。ばらつきの3σがちょうど規格幅に収まっている状態で、不良率は約2,700ppm（0.27%）です。</p>
+            </div>
+            <div class="guide-level guide-level-poor">
+              <div class="guide-level-header">
+                <span class="guide-level-value">Cpk &lt; 1.00</span>
+                <span class="guide-level-badge cpk-poor">能力不足</span>
+              </div>
+              <p>規格外れが頻発しています。ばらつきの低減または平均値の調整が急務です。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 視覚的イメージ -->
+        <div class="card">
+          <h3 class="card-title">視覚的なイメージ</h3>
+          <div class="guide-visual">
+            <div class="guide-visual-row">
+              <span class="guide-visual-label cpk-excellent">Cpk ≧ 1.33</span>
+              <div class="guide-visual-bar">
+                <div class="guide-spec-line guide-spec-lsl">LSL</div>
+                <div class="guide-distribution guide-dist-good"></div>
+                <div class="guide-spec-line guide-spec-usl">USL</div>
+              </div>
+              <span class="guide-visual-note">規格に余裕あり</span>
+            </div>
+            <div class="guide-visual-row">
+              <span class="guide-visual-label cpk-marginal">Cpk ≒ 1.00</span>
+              <div class="guide-visual-bar">
+                <div class="guide-spec-line guide-spec-lsl">LSL</div>
+                <div class="guide-distribution guide-dist-marginal"></div>
+                <div class="guide-spec-line guide-spec-usl">USL</div>
+              </div>
+              <span class="guide-visual-note">ぴったり収まる</span>
+            </div>
+            <div class="guide-visual-row">
+              <span class="guide-visual-label cpk-poor">Cpk &lt; 1.00</span>
+              <div class="guide-visual-bar">
+                <div class="guide-spec-line guide-spec-lsl">LSL</div>
+                <div class="guide-distribution guide-dist-poor"></div>
+                <div class="guide-spec-line guide-spec-usl">USL</div>
+              </div>
+              <span class="guide-visual-note">はみ出す＝不良</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CpとCpkの違い -->
+        <div class="card">
+          <h3 class="card-title">Cp と Cpk の違い</h3>
+          <div class="guide-comparison">
+            <div class="guide-compare-item">
+              <h4>Cp（工程能力ポテンシャル）</h4>
+              <div class="guide-formula-inline">Cp = (USL − LSL) ÷ 6σ</div>
+              <p>平均が規格の中心にあると仮定した場合の能力。ばらつきのみ評価します。</p>
+            </div>
+            <div class="guide-compare-item">
+              <h4>Cpk（工程能力指数）</h4>
+              <div class="guide-formula-inline">Cpk = min(Cpu, Cpl)</div>
+              <p>平均の偏りも考慮した実力値。常に <strong>Cpk ≦ Cp</strong> です。</p>
+            </div>
+          </div>
+          <div class="guide-example">
+            <p><strong>例:</strong> ばらつきは小さい（Cp = 1.50）が、平均が上限寄りにずれている → <strong>Cpk = 0.80</strong> となり、Cpが高くてもCpkが低ければ不良が出ます。</p>
+          </div>
+        </div>
+
+        <!-- 改善アクション -->
+        <div class="card">
+          <h3 class="card-title">Cpkを改善するには？</h3>
+          <div class="guide-actions">
+            <div class="guide-action">
+              <div class="guide-action-icon">&#x1F3AF;</div>
+              <div class="guide-action-content">
+                <h4>平均を中心に寄せる</h4>
+                <p>設備の調整・校正を行い、平均値を規格の中心に近づけます。刃具交換タイミングの最適化、温度管理の安定化が有効です。</p>
+              </div>
+            </div>
+            <div class="guide-action">
+              <div class="guide-action-icon">&#x1F4CF;</div>
+              <div class="guide-action-content">
+                <h4>ばらつきを小さくする</h4>
+                <p>σ（標準偏差）を減らします。作業手順の標準化、設備メンテナンス、材料管理の強化、環境条件の安定化が有効です。</p>
+              </div>
+            </div>
+            <div class="guide-action">
+              <div class="guide-action-icon">&#x1F50D;</div>
+              <div class="guide-action-content">
+                <h4>要因を特定する</h4>
+                <p>このアプリの「要因別比較」タブで、作業者・時間帯・温度帯・工具摩耗ごとのCpkを比較し、品質に影響する要因を見つけましょう。</p>
+              </div>
+            </div>
+            <div class="guide-action">
+              <div class="guide-action-icon">&#x1F4C8;</div>
+              <div class="guide-action-content">
+                <h4>推移を監視する</h4>
+                <p>「Cpk推移」タブで日々のCpk変化を追跡し、改善効果の確認や劣化の早期発見に活用しましょう。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
