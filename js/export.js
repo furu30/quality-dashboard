@@ -73,6 +73,48 @@ window.QualityApp = window.QualityApp || {};
     });
   }
 
+  /** 検査データCSV出力 */
+  function exportInspectionCSV() {
+    data.loadAllMasters().then(function(masters) {
+      data.queryInspections({}).then(function(records) {
+        if (!records.length) {
+          alert('検査データがありません。デモデータを投入してください。');
+          return;
+        }
+
+        var headers = ['ID','日付','時刻','製品名','工程','測定項目','サブグループID','サンプルNo','測定値','USL','LSL','作業者','装置温度(℃)','刃具切削数','備考'];
+        var rows = records.map(function(r) {
+          var product = masters.products[r.productId];
+          var process = masters.processes[r.processId];
+          return [
+            r.id,
+            r.date,
+            r.time || '',
+            product ? product.name : '',
+            process ? process.name : '',
+            r.measurementType || '',
+            r.subgroupId || '',
+            r.sampleNo || '',
+            r.measuredValue != null ? r.measuredValue : '',
+            r.usl != null ? r.usl : '',
+            r.lsl != null ? r.lsl : '',
+            r.operatorName || '',
+            r.equipmentTemp != null ? r.equipmentTemp : '',
+            r.toolCutCount != null ? r.toolCutCount : '',
+            csvEscape(r.notes || '')
+          ];
+        });
+
+        var bom = '\uFEFF';
+        var csv = bom + headers.join(',') + '\n' + rows.map(function(row) {
+          return row.map(function(cell) { return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(',');
+        }).join('\n');
+
+        downloadFile(csv, timestampName('検査データ', 'csv'), 'text/csv;charset=utf-8');
+      });
+    });
+  }
+
   function csvEscape(str) {
     return str.replace(/\n/g, ' ').replace(/\r/g, '');
   }
@@ -112,7 +154,8 @@ window.QualityApp = window.QualityApp || {};
             '工程:' + (jsonData.processes ? jsonData.processes.length : 0),
             '不良種別:' + (jsonData.defectTypes ? jsonData.defectTypes.length : 0),
             '原因:' + (jsonData.rootCauses ? jsonData.rootCauses.length : 0),
-            '不良記録:' + (jsonData.defectRecords ? jsonData.defectRecords.length : 0)
+            '不良記録:' + (jsonData.defectRecords ? jsonData.defectRecords.length : 0),
+            '検査データ:' + (jsonData.inspectionRecords ? jsonData.inspectionRecords.length : 0)
           ];
           statusEl.textContent = 'インポート完了: ' + counts.join(', ');
           statusEl.className = 'import-status success';
@@ -876,6 +919,7 @@ window.QualityApp = window.QualityApp || {};
 
   function init() {
     document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
+    document.getElementById('btn-export-csv-insp').addEventListener('click', exportInspectionCSV);
     document.getElementById('btn-export-json').addEventListener('click', exportJSON);
     document.getElementById('btn-export-skill').addEventListener('click', exportForSkill);
 

@@ -363,6 +363,13 @@
     <section id="tab-histogram" class="tab-panel">
       <div class="chart-filter-bar">
         <div class="form-group">
+          <label>データソース</label>
+          <select id="hist-source">
+            <option value="defect">不良記録</option>
+            <option value="inspection">検査データ</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>期間</label>
           <input type="date" id="hist-date-from">
           <span class="filter-sep">〜</span>
@@ -376,12 +383,16 @@
           <label>工程</label>
           <select id="hist-process"><option value="">全工程</option></select>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="hist-variable-group">
           <label>変数</label>
           <select id="hist-variable">
             <option value="measurementValue">計測値</option>
             <option value="quantity">不良数</option>
           </select>
+        </div>
+        <div class="form-group" id="hist-mtype-group" style="display:none">
+          <label>測定項目</label>
+          <select id="hist-mtype"><option value="">全項目</option></select>
         </div>
         <div class="form-group">
           <label>階級数</label>
@@ -401,6 +412,7 @@
           <div class="stat-item"><span class="stat-label">最小</span><span class="stat-value" id="hist-min">-</span></div>
           <div class="stat-item"><span class="stat-label">最大</span><span class="stat-value" id="hist-max">-</span></div>
           <div class="stat-item"><span class="stat-label">中央値</span><span class="stat-value" id="hist-median">-</span></div>
+          <div class="stat-item" id="hist-cpk-item" style="display:none"><span class="stat-label">Cpk</span><span class="stat-value" id="hist-cpk">-</span></div>
         </div>
       </div>
     </section>
@@ -427,8 +439,15 @@
           <select id="ctrl-type">
             <option value="defect-count">不良数推移 (np管理図)</option>
             <option value="defect-rate">不良率推移 (p管理図)</option>
-            <option value="measurement">計測値推移 (X管理図)</option>
+            <option value="measurement">不良記録 計測値 (X管理図)</option>
+            <option value="insp-xbar">検査データ X̄管理図</option>
+            <option value="insp-r">検査データ R管理図</option>
+            <option value="insp-individual">検査データ 個別値管理図</option>
           </select>
+        </div>
+        <div class="form-group" id="ctrl-mtype-group" style="display:none">
+          <label>測定項目</label>
+          <select id="ctrl-mtype"><option value="">全項目</option></select>
         </div>
         <button class="btn btn-primary btn-sm" id="btn-ctrl-draw">描画</button>
       </div>
@@ -578,6 +597,7 @@
           <p class="card-desc">蓄積した不良記録やマスタデータを外部ファイルとして出力します。</p>
           <div class="export-actions">
             <button class="btn btn-primary" id="btn-export-csv">不良記録 CSV出力</button>
+            <button class="btn btn-primary" id="btn-export-csv-insp">検査データ CSV出力</button>
             <button class="btn btn-primary" id="btn-export-json">全データ JSON出力</button>
           </div>
         </div>

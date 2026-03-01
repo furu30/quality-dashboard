@@ -17,6 +17,11 @@ window.QualityApp = window.QualityApp || {};
     settings:      'key'
   });
 
+  // v2: 検査データテーブル追加
+  db.version(2).stores({
+    inspectionRecords: '++id, date, productId, processId, measurementType, subgroupId, [date+measurementType]'
+  });
+
   // ----- マスタ CRUD -----
 
   /** マスタ名→テーブル取得 */
@@ -95,6 +100,29 @@ window.QualityApp = window.QualityApp || {};
     return queryDefects(filters).then(function(arr) { return arr.length; });
   }
 
+  // ----- 検査データ クエリ -----
+
+  /** フィルタ付き検査データ取得 */
+  function queryInspections(filters) {
+    return db.inspectionRecords.toArray().then(function(records) {
+      if (!filters) return records;
+
+      return records.filter(function(r) {
+        if (filters.dateFrom && r.date < filters.dateFrom) return false;
+        if (filters.dateTo && r.date > filters.dateTo) return false;
+        if (filters.productId && r.productId !== filters.productId) return false;
+        if (filters.processId && r.processId !== filters.processId) return false;
+        if (filters.measurementType && r.measurementType !== filters.measurementType) return false;
+        return true;
+      });
+    });
+  }
+
+  /** 検査データのユニーク測定項目名を取得 */
+  function getInspectionTypes() {
+    return db.inspectionRecords.orderBy('measurementType').uniqueKeys();
+  }
+
   // ----- データ全体操作 -----
 
   /** 全データエクスポート */
@@ -104,45 +132,50 @@ window.QualityApp = window.QualityApp || {};
       db.processes.toArray(),
       db.defectTypes.toArray(),
       db.rootCauses.toArray(),
-      db.defectRecords.toArray()
+      db.defectRecords.toArray(),
+      db.inspectionRecords.toArray()
     ]).then(function(results) {
       return {
-        version: 1,
+        version: 2,
         exportedAt: new Date().toISOString(),
         products: results[0],
         processes: results[1],
         defectTypes: results[2],
         rootCauses: results[3],
-        defectRecords: results[4]
+        defectRecords: results[4],
+        inspectionRecords: results[5]
       };
     });
   }
 
   /** 全データインポート（既存データクリア後） */
   function importAll(data) {
-    return db.transaction('rw', db.products, db.processes, db.defectTypes, db.rootCauses, db.defectRecords, function() {
+    return db.transaction('rw', db.products, db.processes, db.defectTypes, db.rootCauses, db.defectRecords, db.inspectionRecords, function() {
       db.products.clear();
       db.processes.clear();
       db.defectTypes.clear();
       db.rootCauses.clear();
       db.defectRecords.clear();
+      db.inspectionRecords.clear();
 
       if (data.products) db.products.bulkAdd(data.products);
       if (data.processes) db.processes.bulkAdd(data.processes);
       if (data.defectTypes) db.defectTypes.bulkAdd(data.defectTypes);
       if (data.rootCauses) db.rootCauses.bulkAdd(data.rootCauses);
       if (data.defectRecords) db.defectRecords.bulkAdd(data.defectRecords);
+      if (data.inspectionRecords) db.inspectionRecords.bulkAdd(data.inspectionRecords);
     });
   }
 
   /** 全データクリア */
   function clearAll() {
-    return db.transaction('rw', db.products, db.processes, db.defectTypes, db.rootCauses, db.defectRecords, function() {
+    return db.transaction('rw', db.products, db.processes, db.defectTypes, db.rootCauses, db.defectRecords, db.inspectionRecords, function() {
       db.products.clear();
       db.processes.clear();
       db.defectTypes.clear();
       db.rootCauses.clear();
       db.defectRecords.clear();
+      db.inspectionRecords.clear();
     });
   }
 
@@ -188,6 +221,8 @@ window.QualityApp = window.QualityApp || {};
     updateDefect: updateDefect,
     deleteDefect: deleteDefect,
     countDefects: countDefects,
+    queryInspections: queryInspections,
+    getInspectionTypes: getInspectionTypes,
     exportAll: exportAll,
     importAll: importAll,
     clearAll: clearAll,
