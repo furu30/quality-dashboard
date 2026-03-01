@@ -89,18 +89,17 @@ window.QualityApp = window.QualityApp || {};
     return days;
   }
 
-  // ===== デモデータ生成 =====
+  // ===== デモデータ①: 不良統計データ =====
 
-  function seedDemoData() {
-    if (!confirm('デモデータを投入します。既存データに追加されます。よろしいですか？')) return;
+  function seedDemo1() {
+    if (!confirm('デモ①（不良統計データ）を投入します。既存の不良記録・マスタは上書きされます。よろしいですか？')) return;
 
     var products = [
       { code: 'P001', name: '製品A', category: '組立品' },
       { code: 'P002', name: '製品B', category: '加工品' },
       { code: 'P003', name: '製品C', category: '成形品' },
       { code: 'P004', name: '製品D', category: '電子部品' },
-      { code: 'P005', name: '製品E', category: '加工品' },
-      { code: 'B-M6', name: 'M6×20六角ボルト', category: 'ボルト' }
+      { code: 'P005', name: '製品E', category: '加工品' }
     ];
 
     var processes = [
@@ -109,9 +108,7 @@ window.QualityApp = window.QualityApp || {};
       { name: '組立', order: 3, department: '製造' },
       { name: '塗装', order: 4, department: '製造' },
       { name: '検査', order: 5, department: '品質管理' },
-      { name: '出荷前検査', order: 6, department: '品質管理' },
-      { name: 'CNC旋盤', order: 7, department: '製造' },
-      { name: 'ネジ転造', order: 8, department: '製造' }
+      { name: '出荷前検査', order: 6, department: '品質管理' }
     ];
 
     var defectTypes = [
@@ -140,21 +137,15 @@ window.QualityApp = window.QualityApp || {};
       { name: '検査基準不明確', category4M: '方法' }
     ];
 
-    // マスタ登録
-    var pIds, prIds, dtIds, rcIds;
-    var allProducts, allProcesses;
-
     app.db.transaction('rw',
       app.db.products, app.db.processes, app.db.defectTypes,
-      app.db.rootCauses, app.db.defectRecords, app.db.inspectionRecords,
+      app.db.rootCauses, app.db.defectRecords,
     function() {
-      // 既存データクリア → 再投入
       app.db.products.clear();
       app.db.processes.clear();
       app.db.defectTypes.clear();
       app.db.rootCauses.clear();
       app.db.defectRecords.clear();
-      app.db.inspectionRecords.clear();
 
       return Promise.all([
         app.db.products.bulkAdd(products).then(function() { return app.db.products.toArray(); }),
@@ -162,28 +153,67 @@ window.QualityApp = window.QualityApp || {};
         app.db.defectTypes.bulkAdd(defectTypes).then(function() { return app.db.defectTypes.toArray(); }),
         app.db.rootCauses.bulkAdd(rootCauses).then(function() { return app.db.rootCauses.toArray(); })
       ]).then(function(results) {
-        allProducts = results[0];
-        allProcesses = results[1];
-        pIds = allProducts.map(function(r) { return r.id; });
-        prIds = allProcesses.map(function(r) { return r.id; });
-        dtIds = results[2].map(function(r) { return r.id; });
-        rcIds = results[3].map(function(r) { return r.id; });
+        var pIds = results[0].map(function(r) { return r.id; });
+        var prIds = results[1].map(function(r) { return r.id; });
+        var dtIds = results[2].map(function(r) { return r.id; });
+        var rcIds = results[3].map(function(r) { return r.id; });
 
-        // 不良記録生成（過去180日分、約220件）
         var defectRecords = generateDemoRecords(pIds, prIds, dtIds, rcIds, 220);
-
-        // 検査データ生成（M6ボルト CNC旋盤工程 抜取検査）
-        var boltProduct = allProducts.find(function(p) { return p.code === 'B-M6'; });
-        var cncProcess = allProcesses.find(function(p) { return p.name === 'CNC旋盤'; });
-        var inspRecords = generateInspectionRecords(boltProduct.id, cncProcess.id);
-
-        return Promise.all([
-          app.db.defectRecords.bulkAdd(defectRecords),
-          app.db.inspectionRecords.bulkAdd(inspRecords)
-        ]);
+        return app.db.defectRecords.bulkAdd(defectRecords);
       });
     }).then(function() {
-      alert('デモデータを投入しました（不良記録 + 検査データ）');
+      alert('デモ①を投入しました（不良記録220件、製品5種、工程6種、不良種別8種、原因12種）');
+      app.onDataReloaded();
+    }).catch(function(err) {
+      alert('デモデータ投入中にエラーが発生しました: ' + err.message);
+    });
+  }
+
+  // ===== デモデータ②: 時系列検査データ =====
+
+  function seedDemo2() {
+    if (!confirm('デモ②（時系列検査データ）を投入します。既存の検査データは上書きされます。よろしいですか？')) return;
+
+    // 検査データ用の製品・工程を登録（既存に追加）
+    var boltProduct = { code: 'B-M6', name: 'M6×20六角ボルト', category: 'ボルト' };
+    var inspProcesses = [
+      { name: 'CNC旋盤', order: 7, department: '製造' },
+      { name: 'ネジ転造', order: 8, department: '製造' }
+    ];
+
+    // 既存マスタに重複がないか確認して追加
+    var productId, processId;
+
+    app.db.inspectionRecords.clear().then(function() {
+      // 製品: B-M6が既に存在するかチェック
+      return app.db.products.where('code').equals('B-M6').first();
+    }).then(function(existing) {
+      if (existing) {
+        productId = existing.id;
+        return Promise.resolve();
+      } else {
+        return app.db.products.add(boltProduct).then(function(id) { productId = id; });
+      }
+    }).then(function() {
+      // 工程: CNC旋盤が既に存在するかチェック
+      return app.db.processes.where('name').equals('CNC旋盤').first();
+    }).then(function(existing) {
+      if (existing) {
+        processId = existing.id;
+        return Promise.resolve();
+      } else {
+        return app.db.processes.add(inspProcesses[0]).then(function(id) { processId = id; });
+      }
+    }).then(function() {
+      // ネジ転造も追加（存在しなければ）
+      return app.db.processes.where('name').equals('ネジ転造').first().then(function(ex) {
+        if (!ex) return app.db.processes.add(inspProcesses[1]);
+      });
+    }).then(function() {
+      var inspRecords = generateInspectionRecords(productId, processId);
+      return app.db.inspectionRecords.bulkAdd(inspRecords);
+    }).then(function() {
+      alert('デモ②を投入しました（M6ボルト抜取検査データ1200件：30日×4回×5サンプル×2測定項目）');
       app.onDataReloaded();
     }).catch(function(err) {
       alert('デモデータ投入中にエラーが発生しました: ' + err.message);
@@ -419,7 +449,8 @@ window.QualityApp = window.QualityApp || {};
     initTabs();
 
     // ヘッダーボタン
-    document.getElementById('btn-seed-demo').addEventListener('click', seedDemoData);
+    document.getElementById('btn-seed-demo1').addEventListener('click', seedDemo1);
+    document.getElementById('btn-seed-demo2').addEventListener('click', seedDemo2);
     document.getElementById('btn-clear-all').addEventListener('click', clearAllData);
   }
 
