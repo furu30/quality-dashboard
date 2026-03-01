@@ -62,7 +62,69 @@ window.QualityApp = window.QualityApp || {};
 
         // 直近テーブル
         updateRecentTable(allRecords.slice(0, 10), masters);
+
+        // 検査データKPI
+        updateInspectionKPIs();
       });
+    });
+  }
+
+  /** 検査データKPIを計算・表示 */
+  function updateInspectionKPIs() {
+    data.queryInspections({}).then(function(records) {
+      var row = document.getElementById('kpi-inspection-row');
+      if (!records.length) {
+        if (row) row.style.display = 'none';
+        return;
+      }
+      if (row) row.style.display = '';
+
+      // 件数
+      document.getElementById('kpi-insp-count').textContent = records.length;
+
+      // 測定項目の一覧
+      var typeSet = {};
+      records.forEach(function(r) { if (r.measurementType) typeSet[r.measurementType] = true; });
+      var typeNames = Object.keys(typeSet);
+      document.getElementById('kpi-insp-types').textContent = typeNames.length;
+      document.getElementById('kpi-insp-types-sub').textContent = typeNames.join(' / ');
+
+      // 日付範囲
+      var dates = records.map(function(r) { return r.date; }).sort();
+      document.getElementById('kpi-insp-sub').textContent = u.formatDate(dates[0]) + ' 〜 ' + u.formatDate(dates[dates.length - 1]);
+
+      // 測定項目ごとにCpkと規格外れ率を計算（最初の項目で代表表示）
+      var firstType = typeNames[0];
+      var firstRecords = records.filter(function(r) { return r.measurementType === firstType; });
+
+      if (firstRecords.length > 0 && firstRecords[0].usl != null && firstRecords[0].lsl != null) {
+        var vals = firstRecords.map(function(r) { return r.measuredValue; });
+        var mn = u.mean(vals);
+        var sd = u.stddev(vals);
+        var usl = firstRecords[0].usl;
+        var lsl = firstRecords[0].lsl;
+
+        if (sd > 0) {
+          var cpU = (usl - mn) / (3 * sd);
+          var cpL = (mn - lsl) / (3 * sd);
+          var cpk = u.round(Math.min(cpU, cpL), 3);
+          var cpkEl = document.getElementById('kpi-insp-cpk');
+          cpkEl.textContent = cpk;
+          cpkEl.style.color = cpk >= 1.33 ? 'var(--success)' : cpk >= 1.0 ? 'var(--warning)' : 'var(--danger)';
+          document.getElementById('kpi-insp-cpk-sub').textContent = firstType + '（USL=' + usl + ' / LSL=' + lsl + '）';
+        }
+
+        // 規格外れ率
+        var oor = vals.filter(function(v) { return v > usl || v < lsl; }).length;
+        var oorRate = u.round((oor / vals.length) * 100, 2);
+        document.getElementById('kpi-insp-oor').textContent = oorRate + '%';
+        document.getElementById('kpi-insp-oor-sub').textContent = firstType + '：' + oor + '/' + vals.length + '件';
+      } else {
+        document.getElementById('kpi-insp-cpk').textContent = '-';
+        document.getElementById('kpi-insp-cpk-sub').textContent = '';
+        document.getElementById('kpi-insp-oor').textContent = '-';
+        document.getElementById('kpi-insp-oor-sub').textContent = '';
+      }
     });
   }
 

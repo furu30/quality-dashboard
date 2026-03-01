@@ -62,6 +62,9 @@ window.QualityApp = window.QualityApp || {};
     app.pareto.populateFilters();
     app.histogram.populateFilters();
     app.controlChart.populateFilters();
+    // 検査データのドロップダウンも更新（表示中の場合）
+    if (app.histogram.populateInspectionTypes) app.histogram.populateInspectionTypes();
+    if (app.controlChart.populateInspectionTypes) app.controlChart.populateInspectionTypes();
   };
 
   // ===== ガウス乱数（Box-Muller変換） =====
@@ -213,8 +216,20 @@ window.QualityApp = window.QualityApp || {};
       var inspRecords = generateInspectionRecords(productId, processId);
       return app.db.inspectionRecords.bulkAdd(inspRecords);
     }).then(function() {
-      alert('デモ②を投入しました（M6ボルト抜取検査データ1200件：30日×4回×5サンプル×2測定項目）');
       app.onDataReloaded();
+      alert('デモ②を投入しました（M6ボルト抜取検査データ1200件）\n\nヒストグラムタブに自動遷移します。');
+      // alert後にタブ遷移（alertはブロッキングなのでUI操作はその後）
+      switchTab('tab-histogram');
+      var histSource = document.getElementById('hist-source');
+      if (histSource) {
+        histSource.value = 'inspection';
+        histSource.dispatchEvent(new Event('change'));
+      }
+      // 描画を少し遅延させてドロップダウン反映を待つ
+      setTimeout(function() {
+        var drawBtn = document.getElementById('btn-hist-draw');
+        if (drawBtn) drawBtn.click();
+      }, 500);
     }).catch(function(err) {
       alert('デモデータ投入中にエラーが発生しました: ' + err.message);
     });

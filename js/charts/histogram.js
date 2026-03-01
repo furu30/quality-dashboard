@@ -271,7 +271,8 @@ window.QualityApp = window.QualityApp || {};
   app.histogram = {
     init: init,
     draw: draw,
-    populateFilters: populateFilters
+    populateFilters: populateFilters,
+    populateInspectionTypes: populateInspectionTypes
   };
 
 })(window.QualityApp);

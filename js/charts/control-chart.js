@@ -343,7 +343,8 @@ window.QualityApp = window.QualityApp || {};
   app.controlChart = {
     init: init,
     draw: draw,
-    populateFilters: populateFilters
+    populateFilters: populateFilters,
+    populateInspectionTypes: populateInspectionTypes
   };
 
 })(window.QualityApp);
