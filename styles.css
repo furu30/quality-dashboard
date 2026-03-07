@@ -1322,6 +1322,7 @@ textarea { resize: vertical; }
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
   animation: modeOverlayFadeIn 0.3s ease;
 }
 
@@ -1453,6 +1454,24 @@ textarea { resize: vertical; }
 
 .mode-card:hover .mode-card-action {
   color: var(--primary-hover);
+}
+
+.mode-select-help {
+  display: inline-block;
+  margin-top: 32px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 15px;
+  padding: 10px 28px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+}
+.mode-select-help:hover {
+  color: var(--text);
+  border-color: var(--primary);
+  background: rgba(74, 158, 255, 0.1);
 }
 
 /* ===== Mode Indicator in Header ===== */
