@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>使い方ガイド - 品質管理ダッシュボード</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1923;
+      --bg-secondary: #1a2736;
+      --bg-card: #1e2d3d;
+      --bg-card-hover: #253a4e;
+      --text-primary: #e8edf2;
+      --text-secondary: #8899aa;
+      --accent: #4a9eff;
+      --accent-hover: #6bb3ff;
+      --border: #2a3a4a;
+      --danger: #ff6b6b;
+      --success: #51cf66;
+      --warning: #ffd43b;
+      --radius: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.8;
+      min-height: 100vh;
+    }
+
+    /* ===== Header ===== */
+    .tutorial-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .tutorial-header .logo {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; color: #fff;
+    }
+    .tutorial-header h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .back-link {
+      margin-left: auto;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .back-link:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ===== Sidebar Nav ===== */
+    .tutorial-layout {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .sidebar {
+      width: 260px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      padding: 1.5rem 1rem;
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+    }
+    .sidebar a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-bottom: 2px;
+      transition: all 0.15s;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      color: var(--text-primary);
+      background: var(--bg-card);
+    }
+    .sidebar a.active {
+      border-left: 3px solid var(--accent);
+      color: var(--accent);
+    }
+    .sidebar .nav-group {
+      margin-bottom: 1.5rem;
+    }
+    .sidebar .nav-indent {
+      padding-left: 1.5rem;
+      font-size: 0.8rem;
+    }
+
+    /* ===== Main Content ===== */
+    .tutorial-main {
+      flex: 1;
+      padding: 2rem 3rem 4rem;
+      max-width: 960px;
+      min-width: 0;
+    }
+
+    /* ===== Sections ===== */
+    .section {
+      margin-bottom: 4rem;
+    }
+    .section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .section h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+    .section p {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    /* ===== Screenshot ===== */
+    .screenshot {
+      margin: 1.5rem 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    .screenshot img {
+      width: 100%;
+      display: block;
+    }
+    .screenshot-caption {
+      padding: 0.6rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ===== Steps ===== */
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      margin: 1rem 0;
+    }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0.15rem;
+      width: 1.6rem;
+      height: 1.6rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    /* ===== Callout ===== */
+    .callout {
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .callout-info {
+      background: rgba(74, 158, 255, 0.1);
+      border-left: 4px solid var(--accent);
+      color: var(--text-secondary);
+    }
+    .callout-warning {
+      background: rgba(255, 212, 59, 0.1);
+      border-left: 4px solid var(--warning);
+      color: var(--text-secondary);
+    }
+    .callout-success {
+      background: rgba(81, 207, 102, 0.1);
+      border-left: 4px solid var(--success);
+      color: var(--text-secondary);
+    }
+    .callout strong {
+      color: var(--text-primary);
+    }
+
+    /* ===== Badge ===== */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-defect {
+      background: rgba(255, 107, 107, 0.2);
+      color: var(--danger);
+    }
+    .badge-inspection {
+      background: rgba(74, 158, 255, 0.2);
+      color: var(--accent);
+    }
+
+    /* ===== Kbd ===== */
+    kbd {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.85em;
+      font-family: inherit;
+    }
+
+    /* ===== Divider ===== */
+    .mode-divider {
+      text-align: center;
+      margin: 3rem 0;
+      position: relative;
+    }
+    .mode-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .mode-divider span {
+      background: var(--bg-primary);
+      padding: 0 1.5rem;
+      position: relative;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      text-align: center;
+      padding: 3rem 0 2rem;
+    }
+    .hero h2 {
+      font-size: 2rem;
+      border: none;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .tutorial-main { padding: 1.5rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <div class="tutorial-header">
+    <div class="logo">QC</div>
+    <h1>使い方ガイド</h1>
+    <a href="index.html" class="back-link">アプリに戻る</a>
+  </div>
+
+  <div class="tutorial-layout">
+
+    <!-- ===== Sidebar ===== -->
+    <nav class="sidebar">
+      <div class="nav-group">
+        <div class="sidebar-title">はじめに</div>
+        <a href="#overview">概要</a>
+        <a href="#start">起動と基本操作</a>
+      </div>
+      <div class="nav-group">
+        <div class="sidebar-title"><span class="badge badge-defect">不良解析</span> デモ①</div>
+        <a href="#demo1-load">デモデータの投入</a>
+        <a href="#demo1-dashboard" class="nav-indent">ダッシュボード</a>
+        <a href="#demo1-records" class="nav-indent">不良記録</a>
+        <a href="#demo1-masters" class="nav-indent">マスタ管理</a>
+        <a href="#demo1-pareto" class="nav-indent">パレート図</a>
+        <a href="#demo1-scatter" class="nav-indent">散布図</a>
+        <a href="#demo1-stratify" class="nav-indent">層別分析</a>
+      </div>
+      <div class="nav-group">
+        <div class="sidebar-title"><span class="badge badge-inspection">検査解析</span> デモ②</div>
+        <a href="#demo2-load">デモデータの投入</a>
+        <a href="#demo2-dashboard" class="nav-indent">ダッシュボード</a>
+        <a href="#demo2-histogram" class="nav-indent">ヒストグラム</a>
+        <a href="#demo2-control" class="nav-indent">管理図</a>
+        <a href="#demo2-factor" class="nav-indent">要因別比較</a>
+        <a href="#demo2-western" class="nav-indent">管理図異常検出</a>
+        <a href="#demo2-cpk" class="nav-indent">Cpk推移</a>
+      </div>
+      <div class="nav-group">
+        <div class="sidebar-title">その他</div>
+        <a href="#export">データ出力</a>
+        <a href="#tips">活用のヒント</a>
+      </div>
+    </nav>
+
+    <!-- ===== Main ===== -->
+    <div class="tutorial-main">
+
+      <!-- ===== Hero ===== -->
+      <div class="hero">
+        <h2>品質管理ダッシュボード 使い方ガイド</h2>
+        <p>2種類のデモデータを使って、全機能をわかりやすく解説します</p>
+      </div>
+
+      <!-- ===== 概要 ===== -->
+      <div class="section" id="overview">
+        <h2>概要</h2>
+        <p>品質管理ダッシュボードは、製造業向けの品質データ分析ツールです。サーバー不要でブラウザだけで動作し、QC7つ道具を使った品質分析が行えます。</p>
+
+        <p>本ツールには <strong>2つの解析モード</strong> があります：</p>
+
+        <div style="display:flex; gap:1rem; margin:1rem 0; flex-wrap:wrap;">
+          <div style="flex:1; min-width:250px; background:var(--bg-card); padding:1rem; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:0.3rem;">&#x1F4CB;</div>
+            <strong style="color:var(--danger);">不良解析モード</strong>
+            <p style="font-size:0.85rem; margin-top:0.3rem;">不良記録の集計・パレート分析・散布図・層別分析など。品質不良の傾向把握と原因究明に。</p>
+          </div>
+          <div style="flex:1; min-width:250px; background:var(--bg-card); padding:1rem; border-radius:var(--radius); border:1px solid var(--border);">
+            <div style="font-size:1.5rem; margin-bottom:0.3rem;">&#x1F4D0;</div>
+            <strong style="color:var(--accent);">検査解析モード</strong>
+            <p style="font-size:0.85rem; margin-top:0.3rem;">検査測定値のヒストグラム・管理図・工程能力分析など。検査データの統計的分析に。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 起動と基本操作 ===== -->
+      <div class="section" id="start">
+        <h2>起動と基本操作</h2>
+        <p>アプリを開くと、最初にモード選択画面が表示されます。目的に応じたモードを選んでください。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/mode_selection.jpg" alt="モード選択画面">
+          <div class="screenshot-caption">起動時のモード選択画面。解析したいデータの種類に応じて選択します。</div>
+        </div>
+
+        <h3>ヘッダーのボタン説明</h3>
+        <p>画面上部のヘッダーには以下のボタンがあります：</p>
+        <ul class="steps">
+          <li><kbd>モード切替</kbd> ： 不良解析と検査解析を切り替えます</li>
+          <li><kbd>デモ①不良統計</kbd> ： 不良解析用のサンプルデータを投入します</li>
+          <li><kbd>デモ②時系列検査</kbd> ： 検査解析用のサンプルデータを投入します</li>
+          <li><kbd>データリセット</kbd> ： 全データを削除します</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <strong>注意：</strong> デモデータの投入やデータリセットを行うと、既存のデータはすべて削除されます。大切なデータは事前にエクスポートしてください。
+        </div>
+      </div>
+
+      <!-- ============================================= -->
+      <!-- デモ①：不良解析モード -->
+      <!-- ============================================= -->
+      <div class="mode-divider"><span>&#x1F4CB; デモ① 不良解析モード</span></div>
+
+      <div class="section" id="demo1-load">
+        <h2><span class="badge badge-defect">不良解析</span> デモデータの投入</h2>
+        <p>まず、ヘッダーの <kbd>デモ①不良統計</kbd> ボタンをクリックします。確認ダイアログで「OK」を押すと、以下のサンプルデータが自動投入されます：</p>
+        <ul class="steps">
+          <li><strong>製品マスタ</strong>：部品A〜E の5製品</li>
+          <li><strong>工程マスタ</strong>：受入検査・加工・組立・出荷前検査など6工程</li>
+          <li><strong>不良種別</strong>：外観不良・寸法不良・塗装不良など8種別</li>
+          <li><strong>原因マスタ</strong>：4M分類（人・機械・材料・方法）に基づく12原因</li>
+          <li><strong>不良記録</strong>：220件の不良記録データ（過去30日分）</li>
+        </ul>
+        <div class="callout callout-info">
+          <strong>ポイント：</strong> デモデータはリアルな製造現場を想定した疑似データです。各分析機能の動作確認にお使いください。
+        </div>
+      </div>
+
+      <!-- ダッシュボード -->
+      <div class="section" id="demo1-dashboard">
+        <h3><span class="badge badge-defect">不良解析</span> ダッシュボード</h3>
+        <p>デモデータ投入後、ダッシュボードには品質の全体像が表示されます。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo1_dashboard.jpg" alt="不良解析ダッシュボード">
+          <div class="screenshot-caption">不良解析モードのダッシュボード。KPI、不良件数推移グラフ、工程別・種別の内訳が一目でわかります。</div>
+        </div>
+
+        <p>上部の4つの <strong>KPIカード</strong> では、今月の不良件数・不良率・最多不良種別・未対応件数を確認できます。下部には不良件数の推移グラフと、工程別・種別の内訳チャートが表示されます。</p>
+      </div>
+
+      <!-- 不良記録 -->
+      <div class="section" id="demo1-records">
+        <h3><span class="badge badge-defect">不良解析</span> 不良記録</h3>
+        <p>「不良記録」タブでは、個々の不良データの入力と一覧の確認ができます。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo1_records.jpg" alt="不良記録一覧">
+          <div class="screenshot-caption">不良記録の一覧画面。日付・製品・工程・不良種別・原因など詳細な情報を確認できます。</div>
+        </div>
+
+        <p>上部のフォームから新しい不良記録を入力できます。一覧には登録済みの全レコードが表示され、各レコードの編集・削除も可能です。期間やフィルタ条件を指定して、必要なデータだけを表示することもできます。</p>
+      </div>
+
+      <!-- マスタ管理 -->
+      <div class="section" id="demo1-masters">
+        <h3><span class="badge badge-defect">不良解析</span> マスタ管理</h3>
+        <p>「マスタ管理」タブでは、製品・工程・不良種別・原因の各マスタデータを管理します。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo1_masters.jpg" alt="マスタ管理">
+          <div class="screenshot-caption">マスタ管理画面。製品・工程・不良種別・原因の4つのマスタを管理できます。</div>
+        </div>
+
+        <p>マスタデータは不良記録の入力時にドロップダウンとして使用されます。自社の製品名・工程名に合わせてカスタマイズしてください。原因マスタでは <strong>4M分類</strong>（人 Man / 機械 Machine / 材料 Material / 方法 Method）を設定でき、特性要因図的な分析に活用できます。</p>
+      </div>
+
+      <!-- パレート図 -->
+      <div class="section" id="demo1-pareto">
+        <h3><span class="badge badge-defect">不良解析</span> パレート図</h3>
+        <p>「パレート図」タブでは、不良の種類ごとの発生件数を棒グラフと累積曲線で可視化します。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo1_pareto.jpg" alt="パレート図">
+          <div class="screenshot-caption">パレート図。件数の多い不良種別から順に並び、累積比率の折れ線で全体に占める割合がわかります。</div>
+        </div>
+
+        <p>パレート図は <strong>「重点指向」</strong> の考え方に基づき、どの不良に優先的に対策すべきかを判断するのに役立ちます。上位2〜3項目で全体の60〜80%を占めることが多く、ここに集中して対策することで効率的な品質改善が可能です。</p>
+
+        <div class="callout callout-success">
+          <strong>活用例：</strong> フィルタで期間や工程を絞り込むことで、「先月の加工工程で最も多い不良は何か？」といった具体的な分析ができます。
+        </div>
+      </div>
+
+      <!-- 散布図 -->
+      <div class="section" id="demo1-scatter">
+        <h3><span class="badge badge-defect">不良解析</span> 散布図</h3>
+        <p>「散布図」タブでは、2つの変数の関係性を視覚的に確認できます。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo1_scatter.jpg" alt="散布図">
+          <div class="screenshot-caption">散布図。2つの変数間の相関関係を可視化します。</div>
+        </div>
+
+        <p>散布図は要因と結果の <strong>相関関係</strong> を把握するために使います。点が右上がりに分布していれば正の相関、右下がりなら負の相関があります。</p>
+      </div>
+
+      <!-- 層別分析 -->
+      <div class="section" id="demo1-stratify">
+        <h3><span class="badge badge-defect">不良解析</span> 層別分析</h3>
+        <p>「層別分析」タブでは、不良データを複数の切り口でクロス集計し、ヒートマップで表示します。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo1_stratify.jpg" alt="層別分析">
+          <div class="screenshot-caption">層別分析（クロス集計ヒートマップ）。行軸と列軸を自由に選択し、件数や不良率を色の濃淡で表示します。</div>
+        </div>
+
+        <p>行軸・列軸に「工程」「不良種別」「製品」「原因」などを選択し、<strong>クロス集計</strong> を実行します。色の濃い箇所が問題の集中ポイントです。集計値は「件数」「不良率」で切り替えられます。</p>
+
+        <div class="callout callout-success">
+          <strong>活用例：</strong> 「工程×不良種別」で分析すると、「加工工程の外観不良が突出して多い」といった具体的な問題箇所を特定できます。
+        </div>
+      </div>
+
+
+      <!-- ============================================= -->
+      <!-- デモ②：検査解析モード -->
+      <!-- ============================================= -->
+      <div class="mode-divider"><span>&#x1F4D0; デモ② 検査解析モード</span></div>
+
+      <div class="section" id="demo2-load">
+        <h2><span class="badge badge-inspection">検査解析</span> デモデータの投入</h2>
+        <p>ヘッダーの <kbd>デモ②時系列検査</kbd> ボタンをクリックします。確認ダイアログで「OK」を押すと、検査解析用のサンプルデータが投入されます：</p>
+        <ul class="steps">
+          <li><strong>対象製品</strong>：M6×20 六角ボルト</li>
+          <li><strong>測定項目</strong>：軸径（規格: 5.82〜6.00mm）</li>
+          <li><strong>データ量</strong>：30日分 × 1日4回 × 各5サンプル ＝ 約1,200件</li>
+          <li><strong>特徴</strong>：後半に平均値のシフトや異常パターンを含む</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <strong>ポイント：</strong> このデモデータには意図的に工程変動（平均シフト・ばらつき増大）が含まれています。管理図やCpk推移で変化を検出する練習に最適です。
+        </div>
+      </div>
+
+      <!-- ダッシュボード（検査） -->
+      <div class="section" id="demo2-dashboard">
+        <h3><span class="badge badge-inspection">検査解析</span> ダッシュボード</h3>
+        <p>検査解析モードのダッシュボードには、検査データの統計サマリーが表示されます。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo2_dashboard.jpg" alt="検査解析ダッシュボード">
+          <div class="screenshot-caption">検査解析モードのダッシュボード。検査件数、Cpk値、規格外率などの統計情報が表示されます。</div>
+        </div>
+
+        <p>工程能力指数（Cpk）の値が表示され、現在の工程が規格を満たしているかどうかを即座に判断できます。Cpk ≧ 1.33 であれば工程能力は十分、1.00未満の場合は改善が必要です。</p>
+      </div>
+
+      <!-- ヒストグラム -->
+      <div class="section" id="demo2-histogram">
+        <h3><span class="badge badge-inspection">検査解析</span> ヒストグラム</h3>
+        <p>「ヒストグラム」タブでは、検査データの分布を視覚化します。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo2_histogram.jpg" alt="ヒストグラム">
+          <div class="screenshot-caption">ヒストグラム。測定値の分布形状と規格線（USL/LSL）を同時に表示します。</div>
+        </div>
+
+        <p>データの分布が正規分布に近いか、偏りがないかを確認できます。赤い点線は <strong>規格上限（USL）・規格下限（LSL）</strong> を示しており、分布がこの範囲内に十分収まっているかで工程能力を判断します。</p>
+
+        <div class="callout callout-info">
+          <strong>見方のコツ：</strong> 分布が規格線から離れていれば安心。規格線に近い or はみ出していれば要注意です。双峰型（2つの山）になっていれば、異なる条件のデータが混在している可能性があります。
+        </div>
+      </div>
+
+      <!-- 管理図 -->
+      <div class="section" id="demo2-control">
+        <h3><span class="badge badge-inspection">検査解析</span> 管理図</h3>
+        <p>「管理図」タブでは、時系列での工程の安定性を監視します。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo2_control.jpg" alt="管理図">
+          <div class="screenshot-caption">X-bar管理図。中心線（CL）と管理限界線（UCL/LCL）で工程の安定性を監視します。</div>
+        </div>
+
+        <p>管理図は工程が <strong>統計的管理状態</strong> にあるかを判断するツールです。データ点が管理限界線（UCL/LCL）内に収まり、ランダムに変動していれば正常です。管理限界を超えた点や、連続して上昇・下降するトレンドがあれば、工程に異常が発生しています。</p>
+      </div>
+
+      <!-- 要因別比較 -->
+      <div class="section" id="demo2-factor">
+        <h3><span class="badge badge-inspection">検査解析</span> 要因別比較</h3>
+        <p>「検査分析」タブの「要因別比較」サブタブでは、条件ごとの測定値を比較分析できます。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo2_factor.jpg" alt="要因別比較">
+          <div class="screenshot-caption">要因別比較チャート。日別・時間帯別・検査員別などのグループでデータを比較します。</div>
+        </div>
+
+        <p>グループ軸を切り替えることで、「時間帯によって測定値に差があるか」「検査員による違いはあるか」といった要因分析ができます。</p>
+      </div>
+
+      <!-- 管理図異常検出 -->
+      <div class="section" id="demo2-western">
+        <h3><span class="badge badge-inspection">検査解析</span> 管理図異常検出</h3>
+        <p>「管理図異常検出」サブタブでは、ウエスタン・エレクトリック・ルールに基づく自動異常検出を行います。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo2_western.jpg" alt="管理図異常検出">
+          <div class="screenshot-caption">ウエスタン・エレクトリック・ルールによる異常検出結果。各ルールに抵触したポイントがハイライトされます。</div>
+        </div>
+
+        <p>以下の代表的なルールでデータを自動チェックします：</p>
+        <ul class="steps">
+          <li><strong>ルール1</strong>：管理限界（3σ）を超える点</li>
+          <li><strong>ルール2</strong>：連続9点が中心線の同じ側にある</li>
+          <li><strong>ルール3</strong>：連続6点が増加または減少している</li>
+          <li><strong>ルール4</strong>：連続14点が交互に増減している</li>
+        </ul>
+      </div>
+
+      <!-- Cpk推移 -->
+      <div class="section" id="demo2-cpk">
+        <h3><span class="badge badge-inspection">検査解析</span> Cpk推移</h3>
+        <p>「Cpk推移」サブタブでは、工程能力指数の時系列変化を追跡できます。</p>
+
+        <div class="screenshot">
+          <img src="images/tutorial/demo2_cpk.jpg" alt="Cpk推移">
+          <div class="screenshot-caption">Cpk推移チャート。日別のCpk値の変化を追跡し、工程能力の低下を早期に検出します。</div>
+        </div>
+
+        <p>Cpk値が時間とともにどう変化しているかを監視します。基準線（Cpk = 1.33）を下回る期間があれば、その時期に工程に何らかの変動があったことを示しています。デモデータでは後半に意図的な変動が入っているため、Cpk値の低下が確認できます。</p>
+
+        <div class="callout callout-success">
+          <strong>活用例：</strong> 設備メンテナンス後にCpk値が回復したか、季節変動で工程能力が低下していないかなど、長期的な工程管理に活用できます。
+        </div>
+      </div>
+
+
+      <!-- ============================================= -->
+      <!-- データ出力 -->
+      <!-- ============================================= -->
+      <div class="mode-divider"><span>その他の機能</span></div>
+
+      <div class="section" id="export">
+        <h2>データ出力</h2>
+        <p>「データ出力」タブでは、蓄積したデータの書き出しと読み込みが行えます。</p>
+
+        <h3>エクスポート機能</h3>
+        <ul class="steps">
+          <li><strong>CSV出力</strong> ： 不良記録や検査データをCSV形式で出力。Excelなどの外部ツールでさらに分析できます</li>
+          <li><strong>JSON出力</strong> ： 全データ（マスタ含む）をJSON形式で出力。バックアップや他の環境への移行に</li>
+        </ul>
+
+        <h3>インポート機能</h3>
+        <p>JSON形式のデータファイルを読み込み、データを復元できます。定期的なバックアップと組み合わせて活用してください。</p>
+
+        <div class="callout callout-warning">
+          <strong>注意：</strong> インポートを行うと既存のデータは上書きされます。必要に応じて事前にエクスポートを行ってください。
+        </div>
+      </div>
+
+      <!-- ===== 活用のヒント ===== -->
+      <div class="section" id="tips">
+        <h2>活用のヒント</h2>
+
+        <h3>実務での使い始め方</h3>
+        <ol class="steps">
+          <li><strong>マスタ登録</strong> ： まず自社の製品・工程・不良種別・原因をマスタに登録します</li>
+          <li><strong>データ蓄積</strong> ： 日々の品質データを入力し蓄積していきます</li>
+          <li><strong>定期分析</strong> ： 週次・月次でパレート図やダッシュボードを確認し、傾向を把握します</li>
+          <li><strong>改善活動</strong> ： 問題箇所を特定したら、対策を実施して効果を検証します</li>
+        </ol>
+
+        <h3>分析の進め方</h3>
+        <div class="callout callout-info">
+          <strong>おすすめの分析フロー：</strong><br>
+          ① <strong>ダッシュボード</strong> で全体像を把握<br>
+          ② <strong>パレート図</strong> で重点課題を特定<br>
+          ③ <strong>層別分析</strong> で問題の発生条件を絞り込み<br>
+          ④ <strong>散布図</strong> で要因との相関を確認<br>
+          ⑤ 対策実施後、<strong>管理図</strong> で効果を継続監視
+        </div>
+
+        <h3>データのバックアップ</h3>
+        <p>本ツールはブラウザのIndexedDBにデータを保存しています。ブラウザのキャッシュクリアでデータが失われる可能性があるため、定期的に「データ出力」タブからJSONエクスポートを行い、バックアップを取ることをお勧めします。</p>
+      </div>
+
+    </div><!-- /tutorial-main -->
+  </div><!-- /tutorial-layout -->
+
+  <!-- ===== Sidebar scroll highlight ===== -->
+  <script>
+    (function() {
+      const links = document.querySelectorAll('.sidebar a[href^="#"]');
+      const sections = [];
+      links.forEach(link => {
+        const id = link.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (el) sections.push({ el, link });
+      });
+
+      function updateActive() {
+        let current = sections[0];
+        for (const s of sections) {
+          if (s.el.getBoundingClientRect().top <= 120) current = s;
+        }
+        links.forEach(l => l.classList.remove('active'));
+        if (current) current.link.classList.add('active');
+      }
+
+      window.addEventListener('scroll', updateActive, { passive: true });
+      updateActive();
+    })();
+  </script>
+
+</body>
+</html>
